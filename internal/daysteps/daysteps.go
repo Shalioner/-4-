@@ -16,6 +16,7 @@ const (
 	mInKm      = 1000 // Количество метров в одном километре
 )
 
+// parsePackage парсит строку вида "6000,1h30m" (шаги и часы с минутами)
 func parsePackage(data string) (int, time.Duration, error) {
 	parts := strings.Split(data, ",")
 	if len(parts) != 2 {
@@ -41,14 +42,16 @@ func parsePackage(data string) (int, time.Duration, error) {
 	return steps, duration, nil
 }
 
+// Возвращает отчёт о дневной активности (шаги + дистанция + калории)
 func DayActionInfo(data string, weight, height float64) string {
 	steps, duration, err := parsePackage(data)
 	if err != nil {
-		log.Println(err)
+		log.Println(err) // логируем ошибку — требование тестов
 		return ""
 	}
 
-	distance := float64(steps) * stepLength / mInKm
+	distance := float64(steps) * stepLength / mInKm // Дистанция с фиксированной длиной шага
+
 	calories, err := spentcalories.WalkingSpentCalories(steps, weight, height, duration)
 	if err != nil {
 		log.Println(err)

@@ -18,6 +18,9 @@ const (
 	walkingCaloriesCoefficient = 0.5  // коэффициент для расчета калорий при ходьбе
 )
 
+// parseTraining парсит строку вида "7500,Бег,1h15m" (шаги/тип тренировки/ время)
+// Возвращает шаги, тип тренировки, длительность и ошибку
+// Все некорректные события (ноль/отрицательные значения) — возвращаем ошибку сразу на этапе парсинга
 func parseTraining(data string) (int, string, time.Duration, error) {
 	parts := strings.Split(data, ",")
 	if len(parts) != 3 {
@@ -45,12 +48,14 @@ func parseTraining(data string) (int, string, time.Duration, error) {
 	return steps, parts[1], duration, nil
 }
 
+// distance возвращает дистанцию в километрах по росту и количеству шагов
 func distance(steps int, height float64) float64 {
 	stepLength := stepLengthCoefficient * height
 	distanceMeters := float64(steps) * stepLength
 	return distanceMeters / mInKm
 }
 
+// meanSpeed - средняя скорость в км/ч
 func meanSpeed(steps int, height float64, duration time.Duration) float64 {
 	if duration <= 0 {
 		return 0
@@ -58,6 +63,7 @@ func meanSpeed(steps int, height float64, duration time.Duration) float64 {
 	return distance(steps, height) / duration.Hours()
 }
 
+// TrainingInfo — функция формирует отчёт о тренировке
 func TrainingInfo(data string, weight, height float64) (string, error) {
 	steps, trainingType, duration, err := parseTraining(data)
 	if err != nil {
@@ -86,6 +92,7 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 		trainingType, duration.Hours(), distance(steps, height), meanSpeed(steps, height, duration), calories), nil
 }
 
+// RunningSpentCalories — расчёт калорий при беге
 func RunningSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
 	if steps <= 0 {
 		return 0, errors.New("количество шагов обязан быть больше нуля - проверь данные")
@@ -110,6 +117,7 @@ func RunningSpentCalories(steps int, weight, height float64, duration time.Durat
 	return runCal, nil
 }
 
+// WalkingSpentCalories — то же самое, что и бег, но * 0.5
 func WalkingSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
 	if steps <= 0 {
 		return 0, errors.New("количество шагов обязан быть больше нуля - проверь данные")
