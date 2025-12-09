@@ -1,5 +1,6 @@
 package spentcalories
 
+// Sprint 4: Final Version
 import (
 	"errors"
 	"fmt"
